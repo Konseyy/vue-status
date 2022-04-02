@@ -1,60 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-const statusOptions: statusOption[] = [
-	{
-		statusName: 'Draft',
-		color: '#C05717',
-	},
-	{
-		statusName: 'Needs prep.',
-		color: '#FFC58B',
-	},
-	{
-		statusName: 'Needs estimates',
-		color: '#CBF0F0',
-	},
-	{
-		statusName: 'Planned',
-		color: '#E2E6EE',
-	},
-	{
-		statusName: 'Needs input',
-		color: '#B3BCF5',
-	},
-	{
-		statusName: 'Waiting',
-		color: '#47C1BF',
-	},
-	{
-		statusName: 'In progress',
-		color: '#50B83C',
-	},
-	{
-		statusName: 'Needs testing',
-		color: '#FAD200',
-	},
-	{
-		statusName: 'Testing',
-		color: '#FFEA8A',
-	},
-	{
-		statusName: 'Needs review',
-		color: '#5C6AC4',
-	},
-	{
-		statusName: 'Needs attention',
-		color: '#DE1818',
-	},
-	{
-		statusName: 'Completion',
-		color: '#145B39',
-	},
-];
 
-const { status, changeStatusUrl, className } = defineProps<{
+const { status, changeStatusUrl, className, statusOptions } = defineProps<{
 	status: string;
 	changeStatusUrl: string;
 	className: string;
+	statusOptions: statusOption[];
 }>();
 
 type statusOption = {
@@ -64,8 +15,12 @@ type statusOption = {
 
 const statusSelectionOpen = ref(false);
 const statusValue = ref(status);
-const statusColor = ref('#808080');
+const statusColor = ref('');
+const listElementRef = ref<HTMLElement | null>(null);
+const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
+
 function toggleDropdown() {
+	// status list toggle handler
 	statusSelectionOpen.value = !statusSelectionOpen.value;
 	if (statusSelectionOpen.value) {
 		if ((window as any).closeLastOpened) {
@@ -89,18 +44,30 @@ function toggleDropdown() {
 	}
 }
 
-function selectStatus(status: string, color: string) {
+async function selectStatus(status: string, color: string) {
+	// status change handler
 	statusValue.value = status;
 	statusSelectionOpen.value = false;
 	statusColor.value = color;
 	(window as any).closeLastOpened = undefined;
 }
 onMounted(() => {
-	statusOptions.forEach((statusOption) => {
-		if (statusOption.statusName === status) {
-			statusColor.value = statusOption.color;
+	// find appropriate color for status
+	statusColor.value = statusOptions.find((statusOption) => statusOption.statusName === status)?.color ?? '#808080';
+});
+watch(listElementRef, (ref) => {
+	// prevent status list from rendering outside viewport
+	if (ref) {
+		const pos = ref.getBoundingClientRect();
+		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+		if (pos.right > windowWidth) {
+			listElementOffset.value = { x: windowWidth - pos.right, y: listElementOffset.value.y };
 		}
-	});
+		if (pos.bottom > windowHeight) {
+			listElementOffset.value = { x: listElementOffset.value.x, y: windowHeight - pos.bottom };
+		}
+	}
 });
 </script>
 
@@ -118,7 +85,12 @@ onMounted(() => {
 			{{ statusValue }}
 		</button>
 		<div class="statusListMount">
-			<ul class="statusList" v-if="statusSelectionOpen">
+			<ul
+				ref="listElementRef"
+				class="statusList"
+				v-if="statusSelectionOpen"
+				:style="{ transform: `translate(${listElementOffset.x}px,${listElementOffset.y}px)` }"
+			>
 				<li
 					@click.stop="selectStatus(statusOption.statusName, statusOption.color)"
 					class="status"
@@ -139,8 +111,10 @@ onMounted(() => {
 }
 .statusValue {
 	box-sizing: border-box;
-	padding: 0.2rem 0.5rem;
+	padding: 0.15em 0.6em;
 	border-radius: 0.4rem;
+	white-space: nowrap;
+	transition: 0.15s;
 }
 .statusValue.active {
 	color: white;
@@ -167,10 +141,10 @@ onMounted(() => {
 .status {
 	display: flex;
 	align-items: center;
-	max-width: 14em;
-	width: 14em;
-	padding: 0.9em 0 0.9em 1.5em;
-	transition: 0.05s;
+	max-width: 13em;
+	width: 13em;
+	padding: 0.7em 0 0.7em 1.5em;
+	/* transition: 0.05s; */
 	border-left: 2px solid white;
 }
 .status.active {
@@ -185,11 +159,11 @@ onMounted(() => {
 	border-left: 2px solid #f7f9fd;
 }
 .status:first-of-type {
-	padding-top: 1.2rem;
+	padding-top: 1.1rem;
 	border-radius: 10px 10px 0 0;
 }
 .status:last-of-type {
-	padding-bottom: 1.2rem;
+	padding-bottom: 1.1rem;
 	border-radius: 0 0 10px 10px;
 }
 .status:active {
