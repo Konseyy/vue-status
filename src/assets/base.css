@@ -4,6 +4,7 @@ body {
 	/* overflow-x: hidden; */
 }
 button {
+	/* button css reset */
 	border: none;
 	margin: 0;
 	padding: 0;
