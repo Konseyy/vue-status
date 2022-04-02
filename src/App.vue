@@ -3,6 +3,7 @@ import { RouterLink, RouterView } from 'vue-router';
 import HelloWorld from '@/components/HelloWorld.vue';
 import StatusComponent from './components/StatusComponent.vue';
 import { onMounted, ref } from '@vue/runtime-core';
+import {taskStatusOptions, projectStatusOptions} from "@/library/statusOptions";
 
 type task = {
 	status: string;
@@ -69,27 +70,15 @@ onMounted(async () => {
 </script>
 
 <template>
-	<header>
-		<img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-		<div class="wrapper">
-			<HelloWorld msg="You did it!" />
-
-			<nav>
-				<RouterLink to="/">Home</RouterLink>
-				<RouterLink to="/about">About</RouterLink>
-			</nav>
-		</div>
-	</header>
 	<ul class="projectList">
 		<li class="projectContainer" v-for="project in projects">
 			<div class="projectMeta">
 				<span class="projectTitle">{{ project.project_name }}</span>
-				<StatusComponent class-name="projectStatus" :status="project.status" change-status-url="" />
+				<StatusComponent  class-name="projectStatus" :status="project.status" :status-options="projectStatusOptions" change-status-url="" />
 			</div>
 				<li class="taskContainer" v-for="task in project.tasks">
 					<span class="taskTitle">{{ task.event_name }}</span>
-					<StatusComponent class-name="taskStatus" :status="task.status" change-status-url="" />
+					<StatusComponent class-name="taskStatus" :status="task.status" :status-options="taskStatusOptions" change-status-url="" />
 				</li>
 		</li>
 	</ul>
