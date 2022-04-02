@@ -62,8 +62,8 @@ watch(listElementRef, (ref) => {
 		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
 		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
 		listElementOffset.value = {
-			x: Math.min(listElementOffset.value.x, Math.min(0, Math.floor(windowWidth - pos.right))),
-			y: Math.min(listElementOffset.value.y, Math.min(0, Math.floor(windowHeight - pos.bottom))),
+			x: Math.min(listElementOffset.value.x, Math.floor(windowWidth - pos.right)),
+			y: Math.min(listElementOffset.value.y, Math.floor(windowHeight - pos.bottom)),
 		};
 	}
 });
@@ -119,10 +119,6 @@ watch(listElementRef, (ref) => {
 }
 .statusValue:hover {
 	cursor: pointer;
-	filter: brightness(95%);
-}
-.statusValue:active {
-	filter: brightness(80%);
 }
 .statusListMount {
 	position: relative;
