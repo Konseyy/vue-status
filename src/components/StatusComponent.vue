@@ -64,10 +64,17 @@ type statusOption = {
 
 const statusSelectionOpen = ref(false);
 const statusValue = ref(status);
-const statusColor = ref('gray');
+const statusColor = ref('#808080');
 function toggleDropdown() {
 	statusSelectionOpen.value = !statusSelectionOpen.value;
 	if (statusSelectionOpen.value) {
+		if ((window as any).closeLastOpened) {
+			(window as any).closeLastOpened();
+		}
+		(window as any).closeLastOpened = function () {
+			statusSelectionOpen.value = false;
+			(window as any).closeLastOpened = undefined;
+		};
 		window.addEventListener(
 			'click',
 			() => {
@@ -77,6 +84,8 @@ function toggleDropdown() {
 			},
 			{ once: true }
 		);
+	} else {
+		(window as any).closeLastOpened = undefined;
 	}
 }
 
@@ -93,33 +102,22 @@ onMounted(() => {
 		}
 	});
 });
-watch(statusSelectionOpen, (isOpen) => {
-	if (isOpen) {
-		if ((window as any).closeLastOpened) {
-			(window as any).closeLastOpened();
-		}
-		(window as any).closeLastOpened = function () {
-			statusSelectionOpen.value = false;
-			(window as any).closeLastOpened = undefined;
-		};
-	}
-});
 </script>
 
 <template>
-	<div :class="className">
+	<div :class="className" class="statusComponent">
 		<button
 			class="statusValue"
 			:class="{ active: statusSelectionOpen }"
 			:style="{
-				backgroundColor: !statusSelectionOpen ? statusColor : undefined,
-				border: statusSelectionOpen ? `2px solid ${statusColor}` : '2px solid transparent',
+				border: !statusSelectionOpen ? `2px solid ${statusColor}` : '2px solid transparent',
+				backgroundColor: statusSelectionOpen ? statusColor : 'transparent',
 			}"
-			@click.self.stop="toggleDropdown"
+			@click.stop="toggleDropdown"
 		>
 			{{ statusValue }}
 		</button>
-		<div class="stautsListMount">
+		<div class="statusListMount">
 			<ul class="statusList" v-if="statusSelectionOpen">
 				<li
 					@click.stop="selectStatus(statusOption.statusName, statusOption.color)"
@@ -136,12 +134,15 @@ watch(statusSelectionOpen, (isOpen) => {
 </template>
 
 <style scoped>
+.statusComponent {
+	font-size: 1rem;
+}
 .statusValue {
 	box-sizing: border-box;
-	padding: 0.1rem 0.4rem;
-	border-radius: 10px;
+	padding: 0.2rem 0.5rem;
+	border-radius: 0.4rem;
 }
-.statusValue:not(.active) {
+.statusValue.active {
 	color: white;
 }
 .statusValue:hover {
@@ -151,10 +152,12 @@ watch(statusSelectionOpen, (isOpen) => {
 .statusValue:active {
 	filter: brightness(80%);
 }
-.stautsListMount {
+.statusListMount {
 	position: relative;
 }
 .statusList {
+	font-size: 0.9em;
+	margin-top: 3px;
 	position: absolute;
 	background-color: white;
 	border-radius: 10px;
@@ -164,24 +167,34 @@ watch(statusSelectionOpen, (isOpen) => {
 .status {
 	display: flex;
 	align-items: center;
-	padding: 0.2rem 1rem;
+	max-width: 14em;
+	width: 14em;
+	padding: 0.9em 0 0.9em 1.5em;
+	transition: 0.05s;
+	border-left: 2px solid white;
 }
 .status.active {
 	background-color: #ebf5fa;
+	border-left: 2px solid #0085e0;
 }
 .status:hover {
 	cursor: pointer;
 }
 .status:hover:not(.active) {
 	background-color: #f7f9fd;
+	border-left: 2px solid #f7f9fd;
 }
 .status:first-of-type {
-	padding-top: 0.5rem;
+	padding-top: 1.2rem;
 	border-radius: 10px 10px 0 0;
 }
 .status:last-of-type {
-	padding-bottom: 0.5rem;
+	padding-bottom: 1.2rem;
 	border-radius: 0 0 10px 10px;
+}
+.status:active {
+	transition: 0.1s;
+	filter: brightness(95%);
 }
 .statusColor {
 	position: absolute;
@@ -194,7 +207,10 @@ watch(statusSelectionOpen, (isOpen) => {
 	border: 2px solid #f7f9fd;
 }
 .statusName {
-	margin-left: 1.5rem;
+	margin-left: 1.8rem;
 	white-space: nowrap;
+}
+.status.active .statusName {
+	font-weight: 600;
 }
 </style>

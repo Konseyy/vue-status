@@ -87,12 +87,10 @@ onMounted(async () => {
 				<span class="projectTitle">{{ project.project_name }}</span>
 				<StatusComponent class-name="projectStatus" :status="project.status" change-status-url="" />
 			</div>
-			<div class="taskContainer">
-				<template v-for="task in project.tasks">
+				<li class="taskContainer" v-for="task in project.tasks">
 					<span class="taskTitle">{{ task.event_name }}</span>
 					<StatusComponent class-name="taskStatus" :status="task.status" change-status-url="" />
-				</template>
-			</div>
+				</li>
 		</li>
 	</ul>
 	<RouterView />
@@ -112,12 +110,19 @@ ul {
 }
 .projectMeta {
 	padding-bottom: 1rem;
+	display: flex;
+}
+.projectStatus {
+	margin-left: auto;
 }
 .taskContainer {
 	font-size: 1.4rem;
 	margin: 1rem 0;
-	display: grid;
+	display: flex;
 	grid-template-columns: auto auto;
-	row-gap: .5rem;
+	row-gap: 0.5rem;
+}
+.taskStatus{
+	margin-left:auto;
 }
 </style>
