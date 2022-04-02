@@ -54,6 +54,9 @@ async function selectStatus(status: string, color: string) {
 onMounted(() => {
 	// find appropriate color for status
 	statusColor.value = statusOptions.find((statusOption) => statusOption.statusName === status)?.color ?? '#808080';
+	if (statusOptions.length === 0) {
+		console.warn('No status options supplied to component');
+	}
 });
 watch(listElementRef, (ref) => {
 	// prevent status list from rendering outside viewport
@@ -62,8 +65,8 @@ watch(listElementRef, (ref) => {
 		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
 		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
 		listElementOffset.value = {
-			x: Math.min(listElementOffset.value.x, Math.floor(windowWidth - pos.right)),
-			y: Math.min(listElementOffset.value.y, Math.floor(windowHeight - pos.bottom)),
+			x: Math.min(listElementOffset.value.x, windowWidth - pos.right),
+			y: Math.min(listElementOffset.value.y, windowHeight - pos.bottom),
 		};
 	}
 });
@@ -103,7 +106,7 @@ watch(listElementRef, (ref) => {
 	</div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .statusComponent {
 	font-size: 1rem;
 }
@@ -113,12 +116,12 @@ watch(listElementRef, (ref) => {
 	border-radius: 0.4rem;
 	white-space: nowrap;
 	transition: 0.15s;
-}
-.statusValue.active {
-	color: white;
-}
-.statusValue:hover {
-	cursor: pointer;
+	&.active {
+		color: white;
+	}
+	&:hover {
+		cursor: pointer;
+	}
 }
 .statusListMount {
 	position: relative;
@@ -140,29 +143,35 @@ watch(listElementRef, (ref) => {
 	padding: 0.7em 0 0.7em 1.5em;
 	/* transition: 0.05s; */
 	border-left: 2px solid white;
-}
-.status.active {
-	background-color: #ebf5fa;
-	border-left: 2px solid #0085e0;
-}
-.status:hover {
-	cursor: pointer;
-}
-.status:hover:not(.active) {
-	background-color: #f7f9fd;
-	border-left: 2px solid #f7f9fd;
-}
-.status:first-of-type {
-	padding-top: 1.1rem;
-	border-radius: 10px 10px 0 0;
-}
-.status:last-of-type {
-	padding-bottom: 1.1rem;
-	border-radius: 0 0 10px 10px;
-}
-.status:active {
-	transition: 0.1s;
-	filter: brightness(95%);
+	&.active {
+		background-color: #ebf5fa;
+		border-left: 2px solid #0085e0;
+		.statusName {
+			font-weight: 600;
+		}
+	}
+	&:hover {
+		cursor: pointer;
+		.statusColor {
+			border: 2px solid #f7f9fd;
+		}
+	}
+	&:hover:not(.active) {
+		background-color: #f7f9fd;
+		border-left: 2px solid #f7f9fd;
+	}
+	&:first-of-type {
+		padding-top: 1.1rem;
+		border-radius: 10px 10px 0 0;
+	}
+	&:last-of-type {
+		padding-bottom: 1.1rem;
+		border-radius: 0 0 10px 10px;
+	}
+	&:active {
+		transition: 0.1s;
+		filter: brightness(95%);
+	}
 }
 .statusColor {
 	position: absolute;
@@ -171,14 +180,8 @@ watch(listElementRef, (ref) => {
 	border-radius: 50%;
 	border: 2px solid white;
 }
-.status:hover .statusColor {
-	border: 2px solid #f7f9fd;
-}
 .statusName {
 	margin-left: 1.8rem;
 	white-space: nowrap;
-}
-.status.active .statusName {
-	font-weight: 600;
 }
 </style>
