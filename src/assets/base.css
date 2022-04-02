@@ -1,6 +1,7 @@
 @import '@/assets/fonts/Inter/inter.css';
 body {
 	font-family: Inter, Arial, Helvetica, sans-serif;
+	/* overflow-x: hidden; */
 }
 button {
 	border: none;

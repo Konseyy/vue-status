@@ -61,12 +61,10 @@ watch(listElementRef, (ref) => {
 		const pos = ref.getBoundingClientRect();
 		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
 		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-		if (pos.right > windowWidth) {
-			listElementOffset.value = { x: windowWidth - pos.right, y: listElementOffset.value.y };
-		}
-		if (pos.bottom > windowHeight) {
-			listElementOffset.value = { x: listElementOffset.value.x, y: windowHeight - pos.bottom };
-		}
+		listElementOffset.value = {
+			x: Math.min(listElementOffset.value.x, Math.min(0, Math.floor(windowWidth - pos.right))),
+			y: Math.min(listElementOffset.value.y, Math.min(0, Math.floor(windowHeight - pos.bottom))),
+		};
 	}
 });
 </script>
