@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import "@/assets/base.css";
 import { RouterView } from 'vue-router';
 import StatusComponent from './components/StatusComponent.vue';
 import { onMounted, ref } from '@vue/runtime-core';
@@ -70,22 +71,22 @@ onMounted(async () => {
 </script>
 
 <template>
-	<ul class="projectList">
+	<ul :class="$style.projectList">
 		<template :key="project.project_id" v-for="project in projects">
-			<li class="projectContainer">
-				<div class="projectMeta">
-					<span class="projectTitle">{{ project.project_name }}</span>
+			<li :class="$style.projectContainer">
+				<div :class="$style.projectMeta">
+					<span :class="$style.projectTitle">{{ project.project_name }}</span>
 					<StatusComponent
-						class="projectStatus"
+						:class="$style.projectStatus"
 						:status="project.status"
 						:status-options="projectStatusOptions"
 						change-status-url="a"
 					/>
 				</div>
-				<div :key="task.event_id" class="taskContainer" v-for="task in project.tasks">
-					<span class="taskTitle">{{ task.event_name }}</span>
+				<div :key="task.event_id" :class="$style.taskContainer" v-for="task in project.tasks">
+					<span :class="$style.taskTitle">{{ task.event_name }}</span>
 					<StatusComponent
-						class="taskStatus"
+						:class="$style.taskStatus"
 						:status="task.status"
 						:status-options="taskStatusOptions"
 						change-status-url="a"
@@ -97,11 +98,7 @@ onMounted(async () => {
 	<RouterView />
 </template>
 
-<style>
-@import "@/assets/base.css";
-ul {
-	list-style: none;
-}
+<style module lang="scss">
 .projectList {
 	display: grid;
 	grid-template-columns: auto auto auto;
