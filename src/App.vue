@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
-import HelloWorld from '@/components/HelloWorld.vue';
+import { RouterView } from 'vue-router';
 import StatusComponent from './components/StatusComponent.vue';
 import { onMounted, ref } from '@vue/runtime-core';
 import {taskStatusOptions, projectStatusOptions} from "@/library/statusOptions";
