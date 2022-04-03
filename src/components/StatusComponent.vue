@@ -98,7 +98,7 @@ function offsetString() {
 
 <style module lang="scss">
 .statusComponent {
-	font-size: 1rem;
+	font-size: 0.7em;
 }
 .statusValue {
 	box-sizing: border-box;
@@ -135,7 +135,7 @@ function offsetString() {
 	align-items: center;
 	max-width: 13em;
 	width: 13em;
-	padding: 0.7em 0 0.7em 1.5em;
+	padding: 0.8em 0 0.8em 1.5em;
 	/* transition: 0.05s; */
 	border-left: 2px solid white;
 	&.active {
@@ -156,11 +156,11 @@ function offsetString() {
 		border-left: 2px solid #f7f9fd;
 	}
 	&:first-of-type {
-		padding-top: 1.1rem;
+		padding-top: 1rem;
 		border-radius: 10px 10px 0 0;
 	}
 	&:last-of-type {
-		padding-bottom: 1.1rem;
+		padding-bottom: 1rem;
 		border-radius: 0 0 10px 10px;
 	}
 	&:active {

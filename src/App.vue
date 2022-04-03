@@ -75,16 +75,23 @@ onMounted(async () => {
 			<li class="projectContainer">
 				<div class="projectMeta">
 					<span class="projectTitle">{{ project.project_name }}</span>
-					<StatusComponent class="projectStatus" :status="project.status" :status-options="projectStatusOptions"
-						change-status-url="a" />
+					<StatusComponent
+						class="projectStatus"
+						:status="project.status"
+						:status-options="projectStatusOptions"
+						change-status-url="a"
+					/>
 				</div>
-			<li :key="task.event_id" class="taskContainer" v-for="task in project.tasks">
-				<span class="taskTitle">{{ task.event_name }}</span>
-				<StatusComponent class="taskStatus" :status="task.status" :status-options="taskStatusOptions"
-					change-status-url="a" />
+				<div :key="task.event_id" class="taskContainer" v-for="task in project.tasks">
+					<span class="taskTitle">{{ task.event_name }}</span>
+					<StatusComponent
+						class="taskStatus"
+						:status="task.status"
+						:status-options="taskStatusOptions"
+						change-status-url="a"
+					/>
+				</div>
 			</li>
-			</li>
-
 		</template>
 	</ul>
 	<RouterView />
@@ -98,7 +105,7 @@ ul {
 .projectList {
 	display: grid;
 	grid-template-columns: auto auto auto;
-	font-size: .6rem;
+	font-size: 1rem;
 }
 .projectContainer {
 	font-size: 1.6em;
@@ -111,7 +118,7 @@ ul {
 	margin-left: auto;
 }
 .taskContainer {
-	font-size: 1.4em;
+	font-size: 0.8em;
 	margin: 1rem 0;
 	display: flex;
 	grid-template-columns: auto auto;
