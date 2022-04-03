@@ -102,7 +102,7 @@ onMounted(async () => {
 .projectList {
 	display: grid;
 	grid-template-columns: auto auto auto;
-	font-size: 1rem;
+	font-size: 1.1rem;
 }
 .projectContainer {
 	font-size: 1.6em;
@@ -118,7 +118,6 @@ onMounted(async () => {
 	font-size: 0.8em;
 	margin: 1rem 0;
 	display: flex;
-	grid-template-columns: auto auto;
 	row-gap: 0.5rem;
 }
 .taskStatus {
