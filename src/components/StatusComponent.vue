@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 
-const { status, changeStatusUrl, className, statusOptions } = defineProps<{
+const { status, changeStatusUrl, statusOptions } = defineProps<{
 	status: string;
 	changeStatusUrl: string;
-	className: string;
 	statusOptions: statusOption[];
 }>();
 
@@ -15,7 +14,7 @@ type statusOption = {
 
 const statusSelectionOpen = ref(false);
 const statusValue = ref(status);
-const statusColor = ref('');
+const statusColor = ref('#808080');
 const listElementRef = ref<HTMLElement | null>(null);
 const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -53,7 +52,7 @@ async function selectStatus(status: string, color: string) {
 }
 onMounted(() => {
 	// find appropriate color for status
-	statusColor.value = statusOptions.find((statusOption) => statusOption.statusName === status)?.color ?? '#808080';
+	statusColor.value = statusOptions.find((statusOption) => statusOption.statusName === status)?.color ?? statusColor.value;
 	if (statusOptions.length === 0) {
 		console.warn('No status options supplied to component');
 	}
@@ -70,43 +69,34 @@ watch(listElementRef, (ref) => {
 		};
 	}
 });
+function offsetString() {
+	return `${listElementOffset.value.x}px, ${listElementOffset.value.y}px`;
+}
 </script>
 
 <template>
-	<div :class="className" class="statusComponent">
+	<div :class="$style.statusComponent">
 		<button
-			class="statusValue"
-			:class="{ active: statusSelectionOpen }"
-			:style="{
-				border: !statusSelectionOpen ? `2px solid ${statusColor}` : '2px solid transparent',
-				backgroundColor: statusSelectionOpen ? statusColor : 'transparent',
-			}"
+			:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
 			@click.stop="toggleDropdown"
-		>
-			{{ statusValue }}
-		</button>
-		<div class="statusListMount">
-			<ul
-				ref="listElementRef"
-				class="statusList"
-				v-if="statusSelectionOpen"
-				:style="{ transform: `translate(${listElementOffset.x}px,${listElementOffset.y}px)` }"
-			>
+		>{{ statusValue }}</button>
+		<div :class="$style.statusListMount">
+			<ul ref="listElementRef" :class="$style.statusList" v-if="statusSelectionOpen">
 				<li
 					@click.stop="selectStatus(statusOption.statusName, statusOption.color)"
-					class="status"
-					:class="{ active: statusOption.statusName === statusValue }"
+					:class="[$style.status, statusOption.statusName === statusValue ? $style.active : '']"
 					v-for="statusOption in statusOptions"
+					:key="statusOption.statusName"
 				>
-					<div class="statusColor" :style="{ backgroundColor: statusOption.color }" />
-					<span class="statusName">{{ statusOption.statusName }}</span>
+					<div :class="$style.statusColor" :style="{ backgroundColor: statusOption.color }" />
+					<span :class="$style.statusName">{{ statusOption.statusName }}</span>
 				</li>
 			</ul>
 		</div>
 	</div>
 </template>
 
-<style scoped lang="scss">
+<style module lang="scss">
 .statusComponent {
 	font-size: 1rem;
 }
@@ -116,8 +106,12 @@ watch(listElementRef, (ref) => {
 	border-radius: 0.4rem;
 	white-space: nowrap;
 	transition: 0.15s;
+	border: 2px solid v-bind(statusColor);
+	background-color: transparent;
 	&.active {
 		color: white;
+		border: 2px solid transparent;
+		background-color: v-bind(statusColor);
 	}
 	&:hover {
 		cursor: pointer;
@@ -134,6 +128,7 @@ watch(listElementRef, (ref) => {
 	border-radius: 10px;
 	padding: 0;
 	box-shadow: 0 0 25px 2px rgb(199, 199, 199);
+	transform: translate(v-bind(offsetString()));
 }
 .status {
 	display: flex;

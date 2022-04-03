@@ -2,10 +2,11 @@
 import { RouterView } from 'vue-router';
 import StatusComponent from './components/StatusComponent.vue';
 import { onMounted, ref } from '@vue/runtime-core';
-import {taskStatusOptions, projectStatusOptions} from "@/library/statusOptions";
+import { taskStatusOptions, projectStatusOptions } from "@/library/statusOptions";
 
 type task = {
 	status: string;
+	event_id: number;
 	project_id: number;
 	event_name: string;
 };
@@ -70,31 +71,37 @@ onMounted(async () => {
 
 <template>
 	<ul class="projectList">
-		<li class="projectContainer" v-for="project in projects">
-			<div class="projectMeta">
-				<span class="projectTitle">{{ project.project_name }}</span>
-				<StatusComponent  class-name="projectStatus" :status="project.status" :status-options="projectStatusOptions" change-status-url="" />
-			</div>
-				<li class="taskContainer" v-for="task in project.tasks">
-					<span class="taskTitle">{{ task.event_name }}</span>
-					<StatusComponent class-name="taskStatus" :status="task.status" :status-options="taskStatusOptions" change-status-url="" />
-				</li>
-		</li>
+		<template :key="project.project_id" v-for="project in projects">
+			<li class="projectContainer">
+				<div class="projectMeta">
+					<span class="projectTitle">{{ project.project_name }}</span>
+					<StatusComponent class="projectStatus" :status="project.status" :status-options="projectStatusOptions"
+						change-status-url="a" />
+				</div>
+			<li :key="task.event_id" class="taskContainer" v-for="task in project.tasks">
+				<span class="taskTitle">{{ task.event_name }}</span>
+				<StatusComponent class="taskStatus" :status="task.status" :status-options="taskStatusOptions"
+					change-status-url="a" />
+			</li>
+			</li>
+
+		</template>
 	</ul>
 	<RouterView />
 </template>
 
 <style>
-@import '@/assets/base.css';
+@import "@/assets/base.css";
 ul {
 	list-style: none;
 }
 .projectList {
 	display: grid;
 	grid-template-columns: auto auto auto;
+	font-size: .6rem;
 }
 .projectContainer {
-	font-size: 1.6rem;
+	font-size: 1.6em;
 }
 .projectMeta {
 	padding-bottom: 1rem;
@@ -104,13 +111,13 @@ ul {
 	margin-left: auto;
 }
 .taskContainer {
-	font-size: 1.4rem;
+	font-size: 1.4em;
 	margin: 1rem 0;
 	display: flex;
 	grid-template-columns: auto auto;
 	row-gap: 0.5rem;
 }
-.taskStatus{
-	margin-left:auto;
+.taskStatus {
+	margin-left: auto;
 }
 </style>
