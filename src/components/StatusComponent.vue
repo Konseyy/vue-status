@@ -1,23 +1,34 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import type { status } from '@/library/types';
+import { onMounted, reactive, ref, watch } from 'vue';
 
-const { status, changeStatusUrl, statusOptions } = defineProps<{
-	status: string;
+const props = defineProps<{
+	title: string;
+	titleRatio?: number;
+	startingStatus: string;
 	changeStatusUrl: string;
-	statusOptions: statusOption[];
+	statusOptions: status[];
+	reorderStatusOptions: (newOptions: status[]) => void;
 }>();
-
-type statusOption = {
-	statusName: string;
-	color: string;
-};
-
 const statusSelectionOpen = ref(false);
-const statusValue = ref(status);
+const statusValue = ref(props.startingStatus);
+const titleRatio = ref(`${props.titleRatio ?? 1}em`);
 const statusColor = ref('#808080');
 const listElementRef = ref<HTMLElement | null>(null);
 const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
 
+function debounce(func: Function, timeout: number,) {
+	let timer: number
+	return (...args: any[]) => {
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			func(...args)
+		}, timeout)
+	}
+}
+function isStatusActive(status: status) {
+	return status.status_name.toLowerCase() === statusValue.value.toLowerCase() || status.status_id.toLowerCase() === statusValue.value.toLowerCase()
+}
 function toggleDropdown() {
 	// status list toggle handler
 	statusSelectionOpen.value = !statusSelectionOpen.value;
@@ -49,68 +60,125 @@ async function selectStatus(status: string, color: string) {
 	statusSelectionOpen.value = false;
 	statusColor.value = color;
 	(window as any).closeLastOpened = undefined;
+	//TODO API call to modify status
 }
-onMounted(() => {
-	// find appropriate color for status
-	statusColor.value = statusOptions.find((statusOption) => statusOption.statusName === status)?.color ?? statusColor.value;
-	if (statusOptions.length === 0) {
-		console.warn('No status options supplied to component');
-	}
-});
-watch(listElementRef, (ref) => {
+function calculateOffset() {
+	console.log("called");
+	if (!listElementRef.value) return { x: 0, y: 0 };
 	// prevent status list from rendering outside viewport
-	if (ref) {
-		const pos = ref.getBoundingClientRect();
-		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-		listElementOffset.value = {
-			x: Math.min(listElementOffset.value.x, windowWidth - pos.right),
-			y: Math.min(listElementOffset.value.y, windowHeight - pos.bottom),
-		};
-	}
-});
+	const pos = listElementRef.value.getBoundingClientRect();
+	const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+	const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+	return {
+		x: Math.min(0, listElementOffset.value.x + windowWidth - pos.right),
+		y: Math.min(0, listElementOffset.value.y + windowHeight - pos.bottom),
+	};
+}
+const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
+
 function offsetString() {
 	return `${listElementOffset.value.x}px, ${listElementOffset.value.y}px`;
 }
+function startDrag(evt: DragEvent, originalIndex: number) {
+	if (!evt.dataTransfer) return;
+	evt.dataTransfer.dropEffect = 'move'
+	evt.dataTransfer.effectAllowed = 'move'
+	evt.dataTransfer.setData('draggingIndex', originalIndex.toString())
+}
+function onDrop(evt: DragEvent, droppedOnIndex: number) {
+	if (!evt.dataTransfer) return;
+	const draggingIndex = parseInt(evt.dataTransfer.getData('draggingIndex'));
+	const draggedStatus = props.statusOptions[draggingIndex];
+	const newStatusOptions = props.statusOptions;
+	newStatusOptions.splice(draggingIndex, 1);
+	newStatusOptions.splice(droppedOnIndex, 0, draggedStatus);
+	props.reorderStatusOptions(newStatusOptions);
+}
+onMounted(() => {
+	// find appropriate color for intial status
+	statusColor.value = props.statusOptions.find((statusOption) => isStatusActive(statusOption))?.color ?? statusColor.value;
+	if (props.statusOptions.length === 0) {
+		console.warn('No status options supplied to component');
+	}
+	// put selector in viewport if it's outside on window resize
+	window.addEventListener("resize", () => {
+		if (listElementRef.value) {
+			// debouncedCalculateOffset()
+		}
+	});
+	// put selector in viewport if it's outside on scroll
+	window.addEventListener("scroll", () => {
+		if (listElementRef.value) {
+			// debouncedCalculateOffset()
+		}
+	});
+});
+watch(listElementRef, (ref) => {
+	if (ref) {
+		listElementOffset.value = calculateOffset();
+	}
+});
 </script>
 
 <template>
 	<div :class="$style.statusComponent">
-		<button
-			:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
-			@click.stop="toggleDropdown"
-		>{{ statusValue }}</button>
-		<div :class="$style.statusListMount">
-			<ul ref="listElementRef" :class="$style.statusList" v-if="statusSelectionOpen">
-				<li
-					@click.stop="selectStatus(statusOption.statusName, statusOption.color)"
-					:class="[$style.status, statusOption.statusName === statusValue ? $style.active : '']"
-					v-for="statusOption in statusOptions"
-					:key="statusOption.statusName"
+		<span :class="$style.title">{{ props.title }}</span>
+		<div>
+			<button
+				:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
+				@click.stop="toggleDropdown"
+			>{{ statusValue }}</button>
+			<div :class="$style.statusListMount">
+				<ul
+					ref="listElementRef"
+					:class="$style.statusList"
+					v-if="statusSelectionOpen"
+					@dragover.prevent
+					@dragenter.prevent
 				>
-					<div :class="$style.statusColor" :style="{ backgroundColor: statusOption.color }" />
-					<span :class="$style.statusName">{{ statusOption.statusName }}</span>
-				</li>
-			</ul>
+					<li
+						v-for="(statusOption, currentIndex) in props.statusOptions"
+						:key="statusOption.status_name"
+						:class="[$style.status, isStatusActive(statusOption) ? $style.active : '']"
+						draggable="true"
+						@dragstart="startDrag($event, currentIndex)"
+						@drop="onDrop($event, currentIndex)"
+						@click.stop="selectStatus(statusOption.status_name, statusOption.color)"
+					>
+						<div :class="$style.statusColor" :style="{ backgroundColor: statusOption.color }" />
+						<div :class="$style.statusName">{{ statusOption.status_name }}</div>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </template>
 
 <style module lang="scss">
+[draggable="true"] {
+	-khtml-user-drag: element;
+}
 .statusComponent {
-	font-size: 0.7em;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+.title {
+	width: 15em;
+	font-size: v-bind(titleRatio);
 }
 .statusValue {
+	max-width: 15em;
 	box-sizing: border-box;
-	padding: 0.15em 0.6em;
-	border-radius: 0.4rem;
+	padding: 2px 8px;
+	border-radius: 0.33rem;
 	white-space: nowrap;
 	transition: 0.15s;
-	border: 2px solid v-bind(statusColor);
+	border: 1px solid v-bind(statusColor);
 	background-color: transparent;
 	&.active {
 		color: white;
-		border: 2px solid transparent;
+		border: 1px solid transparent;
 		background-color: v-bind(statusColor);
 	}
 	&:hover {
@@ -121,7 +189,6 @@ function offsetString() {
 	position: relative;
 }
 .statusList {
-	font-size: 0.9em;
 	margin-top: 3px;
 	position: absolute;
 	background-color: white;

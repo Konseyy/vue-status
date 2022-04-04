@@ -1,126 +1,57 @@
 <script setup lang="ts">
 import "@/assets/base.css";
-import { RouterView } from 'vue-router';
-import StatusComponent from './components/StatusComponent.vue';
-import { onMounted, ref } from '@vue/runtime-core';
-import { taskStatusOptions, projectStatusOptions } from "@/library/statusOptions";
-
-type task = {
-	status: string;
-	event_id: number;
-	project_id: number;
-	event_name: string;
-};
-type project = {
-	status: string;
-	project_name: string;
-	project_id: number;
-	tasks: task[];
-};
-const projects = ref<project[]>([]);
-
-async function getProjects() {
-	try {
-		const projectsResponse = await fetch('https://homeassignment.scoro.com/api/v2/projects/list', {
-			method: 'POST',
-			body: JSON.stringify({
-				lang: 'eng',
-				company_account_id: import.meta.env.VITE_COMPANY_ID,
-				apiKey: import.meta.env.VITE_API_KEY,
-				request: {},
-			}),
-		});
-		const projectsResponseJSON = await projectsResponse.json();
-		if (projectsResponseJSON.statusCode === 200) {
-			projects.value = projectsResponseJSON.data;
-		} else {
-			console.error(`error fetching project data, received status code ${projectsResponseJSON.statusCode}`);
-		}
-	} catch (e) {
-		console.error('error fetching project data', e);
-	}
-}
-
-async function getTasks() {
-	try {
-		const tasksResponse = await fetch('https://homeassignment.scoro.com/api/v2/tasks/list', {
-			method: 'POST',
-			body: JSON.stringify({
-				lang: 'eng',
-				company_account_id: import.meta.env.VITE_COMPANY_ID,
-				apiKey: import.meta.env.VITE_API_KEY,
-				request: {},
-			}),
-		});
-		const tasksResponseJSON = await tasksResponse.json();
-		if (tasksResponseJSON.statusCode === 200) {
-			projects.value.forEach((project) => {
-				project.tasks = tasksResponseJSON.data.filter((task: task) => task.project_id === project.project_id);
-			});
-		} else {
-			console.error(`error fetching task data, received status code ${tasksResponseJSON.statusCode}`);
-		}
-	} catch (e) {
-		console.error('error fetching task data', e);
-	}
-}
-onMounted(async () => {
-	await getProjects();
-	await getTasks();
-});
+import { RouterView, RouterLink, useRouter } from 'vue-router';
+const router = useRouter();
 </script>
 
 <template>
-	<ul :class="$style.projectList">
-		<template :key="project.project_id" v-for="project in projects">
-			<li :class="$style.projectContainer">
-				<div :class="$style.projectMeta">
-					<span :class="$style.projectTitle">{{ project.project_name }}</span>
-					<StatusComponent
-						:class="$style.projectStatus"
-						:status="project.status"
-						:status-options="projectStatusOptions"
-						change-status-url="a"
-					/>
-				</div>
-				<div :key="task.event_id" :class="$style.taskContainer" v-for="task in project.tasks">
-					<span :class="$style.taskTitle">{{ task.event_name }}</span>
-					<StatusComponent
-						:class="$style.taskStatus"
-						:status="task.status"
-						:status-options="taskStatusOptions"
-						change-status-url="a"
-					/>
-				</div>
+	<header class="header">
+		<ul class="pageSelector">
+			<li v-for="route in router.options.routes">
+				<RouterLink class="pageLink" :to="{ name: route.name }">{{ route.name }}</RouterLink>
 			</li>
-		</template>
-	</ul>
-	<RouterView />
+		</ul>
+	</header>
+	<main class="pageContent">
+		<RouterView />
+	</main>
 </template>
 
-<style module lang="scss">
-.projectList {
-	display: grid;
-	grid-template-columns: auto auto auto;
-	font-size: 1.1rem;
+<style lang="scss">
+.header {
+	margin-top: 3em;
+	margin-bottom: 2em;
 }
-.projectContainer {
-	font-size: 1.6em;
-}
-.projectMeta {
-	padding-bottom: 1rem;
+.pageContent {
 	display: flex;
+	justify-content: center;
+	font-size: 12px;
 }
-.projectStatus {
-	margin-left: auto;
-}
-.taskContainer {
-	font-size: 0.8em;
-	margin: 1rem 0;
+.pageSelector {
+	margin-top: 2em;
 	display: flex;
-	row-gap: 0.5rem;
+	align-items: center;
+	justify-content: center;
+	gap: 2rem;
 }
-.taskStatus {
-	margin-left: auto;
+.pageLink {
+	text-decoration: none;
+	font-size: 2em;
+	padding: 0.45em 0.55em;
+	border-radius: 0.4em;
+	box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+	color: white;
+	background-color: rgb(140, 140, 140);
+	transition: background-color 0.15s;
+	&:hover {
+		background-color: rgb(120, 120, 120);
+	}
+	&:active,
+	&.router-link-active:active {
+		background-color: rgb(70, 70, 70);
+	}
+	&.router-link-active {
+		background-color: rgb(90, 90, 90);
+	}
 }
 </style>
