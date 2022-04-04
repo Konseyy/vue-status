@@ -202,6 +202,7 @@ watch(listElementRef, (ref) => {
 	box-sizing: border-box;
 	min-height: 32px;
 	border-left: 2px solid transparent;
+	padding: 8px 0;
 	&.active {
 		background-color: #ebf5fa;
 		border-left: 2px solid #0085e0;
@@ -242,5 +243,6 @@ watch(listElementRef, (ref) => {
 }
 .statusName {
 	margin-left: 34px;
+	padding-right: 5px;
 }
 </style>
