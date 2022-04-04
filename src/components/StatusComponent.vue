@@ -74,8 +74,6 @@ function calculateOffset() {
 		y: Math.min(0, listElementOffset.value.y + windowHeight - pos.bottom),
 	};
 }
-const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
-
 function offsetString() {
 	return `${listElementOffset.value.x}px, ${listElementOffset.value.y}px`;
 }
@@ -100,6 +98,7 @@ onMounted(() => {
 	if (props.statusOptions.length === 0) {
 		console.warn('No status options supplied to component');
 	}
+	const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
 	// put selector in viewport if it's outside on window resize
 	window.addEventListener("resize", () => {
 		if (listElementRef.value) {
@@ -159,8 +158,8 @@ watch(listElementRef, (ref) => {
 	-khtml-user-drag: element;
 }
 .statusComponent {
-	display: flex;
-	align-items: center;
+	display: grid;
+	grid-template-columns: auto 160px;
 	width: 100%;
 }
 .title {
@@ -171,7 +170,7 @@ watch(listElementRef, (ref) => {
 	max-width: 15em;
 	box-sizing: border-box;
 	padding: 2px 8px;
-	border-radius: 0.33rem;
+	border-radius: 4px;
 	white-space: nowrap;
 	transition: 0.15s;
 	border: 1px solid v-bind(statusColor);
@@ -189,22 +188,20 @@ watch(listElementRef, (ref) => {
 	position: relative;
 }
 .statusList {
-	margin-top: 3px;
 	position: absolute;
 	background-color: white;
-	border-radius: 10px;
+	border-radius: 4px;
 	padding: 0;
 	box-shadow: 0 0 25px 2px rgb(199, 199, 199);
+	width: 160px;
 	transform: translate(v-bind(offsetString()));
 }
 .status {
 	display: flex;
 	align-items: center;
-	max-width: 13em;
-	width: 13em;
-	padding: 0.8em 0 0.8em 1.5em;
-	/* transition: 0.05s; */
-	border-left: 2px solid white;
+	box-sizing: border-box;
+	min-height: 32px;
+	border-left: 2px solid transparent;
 	&.active {
 		background-color: #ebf5fa;
 		border-left: 2px solid #0085e0;
@@ -223,12 +220,12 @@ watch(listElementRef, (ref) => {
 		border-left: 2px solid #f7f9fd;
 	}
 	&:first-of-type {
-		padding-top: 1rem;
-		border-radius: 10px 10px 0 0;
+		padding-top: 10px;
+		border-radius: 4px 4px 0 0;
 	}
 	&:last-of-type {
-		padding-bottom: 1rem;
-		border-radius: 0 0 10px 10px;
+		padding-bottom: 10px;
+		border-radius: 0 0 4px 4px;
 	}
 	&:active {
 		transition: 0.1s;
@@ -237,13 +234,13 @@ watch(listElementRef, (ref) => {
 }
 .statusColor {
 	position: absolute;
-	height: 15px;
-	width: 15px;
+	margin-left: 14px;
+	height: 12px;
+	width: 12px;
 	border-radius: 50%;
 	border: 2px solid white;
 }
 .statusName {
-	margin-left: 1.8rem;
-	white-space: nowrap;
+	margin-left: 34px;
 }
 </style>
