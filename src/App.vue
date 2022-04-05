@@ -46,6 +46,7 @@ header {
 	@media (max-width: 900px) {
 		& {
 			padding: 0;
+			padding-bottom: .5rem;
 		}
 	}
 }
