@@ -5,15 +5,14 @@ import { onMounted, ref, watch } from 'vue';
 const props = defineProps<{
 	title: string;
 	titleRatio?: number;
-	startingStatus: string;
+	startingStatus: status;
 	statusOptions: status[];
 	modifyStatus: (newStatus: string) => void;
 	reorderStatusOptions: (newOptions: status[]) => void;
 }>();
 const statusSelectionOpen = ref(false);
-const statusValue = ref(props.startingStatus);
+const statusValue = ref<status>(props.startingStatus);
 const titleRatio = ref(`${props.titleRatio ?? 1}em`);
-const statusColor = ref('#808080');
 const listElementRef = ref<HTMLElement | null>(null);
 const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -27,7 +26,7 @@ function debounce(func: Function, timeout: number,) {
 	}
 }
 function isStatusActive(status: status) {
-	return status.status_name.toLowerCase() === statusValue.value.toLowerCase() || status.status_id.toLowerCase() === statusValue.value.toLowerCase()
+	return status.status_id === props.startingStatus.status_id
 }
 function toggleDropdown() {
 	// status list toggle handler
@@ -56,9 +55,8 @@ function toggleDropdown() {
 
 async function selectStatus(status: status) {
 	// status change handler
-	statusValue.value = status.status_name;
+	statusValue.value = status;
 	statusSelectionOpen.value = false;
-	statusColor.value = status.color;
 	(window as any).closeLastOpened = undefined;
 	props.modifyStatus(status.status_id);
 }
@@ -95,8 +93,6 @@ onMounted(() => {
 	if (props.statusOptions.length === 0) {
 		console.warn('No status options supplied to component');
 	}
-	// find appropriate color for intial status
-	statusColor.value = props.statusOptions.find((statusOption) => isStatusActive(statusOption))?.color ?? statusColor.value;
 	const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
 	// put selector in viewport if it's outside on window resize
 	window.addEventListener("resize", () => {
@@ -125,7 +121,7 @@ watch(listElementRef, (ref) => {
 			<button
 				:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
 				@click.stop="toggleDropdown"
-			>{{ statusValue }}</button>
+			>{{ statusValue.status_name }}</button>
 			<div :class="$style.statusListMount">
 				<ul
 					ref="listElementRef"
@@ -172,12 +168,12 @@ watch(listElementRef, (ref) => {
 	border-radius: 4px;
 	white-space: nowrap;
 	transition: 0.15s;
-	border: 1px solid v-bind(statusColor);
+	border: 1px solid v-bind("statusValue.color");
 	background-color: transparent;
 	&.active {
 		color: white;
 		border: 1px solid transparent;
-		background-color: v-bind(statusColor);
+		background-color: v-bind("statusValue.color");
 	}
 	&:hover {
 		cursor: pointer;

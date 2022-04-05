@@ -60,6 +60,7 @@ async function getTaskStatuses() {
 }
 async function changeStatus(taskId: number, newStatus: string) {
 	// TODO api change status
+	console.log(`changing task with id ${taskId} to status ${newStatus}`);
 }
 </script>
 

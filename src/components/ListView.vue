@@ -20,7 +20,13 @@ function changeStatusOrder(newOrder: status[]) {
 		}));
 	}
 }
+function getActiveStatus(itemStatus: string) {
+	return statuses.value.find((status) => {
+		return status.status_name.toLocaleLowerCase() === itemStatus.toLowerCase() || status.status_id.toLocaleLowerCase() === itemStatus.toLowerCase()
+	}) ?? { status_id: '', status_name: 'Starting status not found', color: '#808080' }
+}
 onMounted(async () => {
+	//retrieve statuses before items so items dont get rendered without statuses
 	statuses.value = await props.getStatuses();
 	items.value = await props.getItems();
 	lastStatusResponse.value = statuses.value.map((s) => s);
@@ -49,7 +55,7 @@ onMounted(async () => {
 				:title="item.title"
 				:title-ratio="1.5"
 				:class="$style.status"
-				:starting-status="item.status"
+				:starting-status="getActiveStatus(item.status)"
 				:status-options="statuses"
 				:reorder-status-options="changeStatusOrder"
 				:modify-status="(newStatus: string) => props.modifyStatus(item.id, newStatus)"
