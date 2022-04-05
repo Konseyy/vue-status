@@ -12,9 +12,10 @@ const props = defineProps<{
 }>();
 const statusSelectionOpen = ref(false);
 const statusValue = ref<status>(props.startingStatus);
-const titleRatio = ref(`${props.titleRatio ?? 1}em`);
+const labelIsHovered = ref(false);
 const listElementRef = ref<HTMLElement | null>(null);
 const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
+const titleRatio = `${props.titleRatio ?? 1}em`;
 
 function debounce(func: Function, timeout: number,) {
 	let timer: number
@@ -74,15 +75,15 @@ function calculateOffset() {
 function offsetString() {
 	return `${listElementOffset.value.x}px, ${listElementOffset.value.y}px`;
 }
-function startDrag(evt: DragEvent, originalIndex: number) {
-	if (!evt.dataTransfer) return;
-	evt.dataTransfer.dropEffect = 'move'
-	evt.dataTransfer.effectAllowed = 'move'
-	evt.dataTransfer.setData('draggingIndex', originalIndex.toString())
+function startDrag(event: DragEvent, originalIndex: number) {
+	if (!event.dataTransfer) return;
+	event.dataTransfer.dropEffect = 'move'
+	event.dataTransfer.effectAllowed = 'move'
+	event.dataTransfer.setData('draggingIndex', originalIndex.toString())
 }
-function onDrop(evt: DragEvent, droppedOnIndex: number) {
-	if (!evt.dataTransfer) return;
-	const draggingIndex = parseInt(evt.dataTransfer.getData('draggingIndex'));
+function onDrop(event: DragEvent, droppedOnIndex: number) {
+	if (!event.dataTransfer) return;
+	const draggingIndex = parseInt(event.dataTransfer.getData('draggingIndex'));
 	const draggedStatus = props.statusOptions[draggingIndex];
 	const newStatusOptions = props.statusOptions;
 	newStatusOptions.splice(draggingIndex, 1);
@@ -121,7 +122,9 @@ watch(listElementRef, (ref) => {
 			<button
 				:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
 				@click.stop="toggleDropdown"
-			>{{ statusValue.status_name }}</button>
+				@mouseover="labelIsHovered = true"
+				@mouseleave="labelIsHovered = false"
+			>{{ !labelIsHovered && !statusSelectionOpen ? statusValue.status_name[0] : statusValue.status_name }}</button>
 			<div :class="$style.statusListMount">
 				<ul
 					ref="listElementRef"
@@ -154,7 +157,7 @@ watch(listElementRef, (ref) => {
 }
 .statusComponent {
 	display: grid;
-	grid-template-columns: auto 160px;
+	grid-template-columns: auto 130px;
 	width: 100%;
 }
 .title {
@@ -162,21 +165,34 @@ watch(listElementRef, (ref) => {
 	font-size: v-bind(titleRatio);
 }
 .statusValue {
+	display: flex;
+	justify-content: center;
 	max-width: 15em;
 	box-sizing: border-box;
-	padding: 2px 8px;
 	border-radius: 4px;
-	white-space: nowrap;
-	transition: 0.15s;
+	padding: 2px 0;
 	border: 1px solid v-bind("statusValue.color");
-	background-color: transparent;
+	background-color: v-bind("statusValue.color");
+	width: 20px;
+	color: white;
+	transition: background-color 0.15s, padding 0.3s;
+	&:hover,
 	&.active {
+		width: auto;
+		max-width: 130px;
+		padding: 2px 8px;
+	}
+	&.active,
+	&:hover.active {
+		width: auto;
 		color: white;
 		border: 1px solid transparent;
 		background-color: v-bind("statusValue.color");
 	}
 	&:hover {
 		cursor: pointer;
+		color: black;
+		background-color: transparent;
 	}
 }
 .statusListMount {
