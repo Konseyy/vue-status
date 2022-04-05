@@ -118,7 +118,7 @@ watch(listElementRef, (ref) => {
 <template>
 	<div :class="$style.statusComponent">
 		<span :class="$style.title">{{ props.title }}</span>
-		<div>
+		<div :class="$style.dropdownContainer">
 			<button
 				:class="[$style.statusValue, statusSelectionOpen ? $style.active : '']"
 				@click.stop="toggleDropdown"
@@ -157,14 +157,20 @@ watch(listElementRef, (ref) => {
 }
 .statusComponent {
 	display: grid;
-	grid-template-columns: auto 130px;
+	grid-template-columns: minmax(0, 1fr) 130px;
 	width: 100%;
 }
 .title {
-	width: 15em;
 	font-size: v-bind(titleRatio);
 }
+.dropdownContainer {
+	display: flex;
+	flex-direction: column;
+	justify-self: end;
+}
 .statusValue {
+	// margin-left:auto;
+	align-self: flex-end;
 	display: flex;
 	justify-content: center;
 	max-width: 15em;
@@ -175,6 +181,7 @@ watch(listElementRef, (ref) => {
 	background-color: v-bind("statusValue.color");
 	width: 20px;
 	color: white;
+	user-select: none;
 	transition: background-color 0.2s, padding 0.5s;
 	&:hover,
 	&.active {
@@ -192,7 +199,7 @@ watch(listElementRef, (ref) => {
 	&:hover {
 		cursor: pointer;
 		color: black;
-		background-color: transparent;
+		background-color: white;
 	}
 }
 .statusListMount {
@@ -203,7 +210,8 @@ watch(listElementRef, (ref) => {
 	background-color: white;
 	border-radius: 4px;
 	padding: 0;
-	box-shadow: 0 0 25px 2px rgb(199, 199, 199);
+	box-shadow: 0px 2px 6px rgba(31, 34, 38, 0.08),
+		0px 8px 32px rgba(31, 34, 38, 0.12);
 	width: 160px;
 	transform: translate(v-bind(offsetString()));
 }
@@ -246,7 +254,8 @@ watch(listElementRef, (ref) => {
 }
 .statusColor {
 	position: absolute;
-	margin-left: 14px;
+	box-sizing: content-box;
+	margin-left: 12px;
 	height: 12px;
 	width: 12px;
 	border-radius: 50%;
