@@ -26,7 +26,7 @@ function debounce(func: Function, timeout: number,) {
 	}
 }
 function isStatusActive(status: status) {
-	return status.status_id === props.startingStatus.status_id
+	return status.status_id === statusValue.value.status_id
 }
 function toggleDropdown() {
 	// status list toggle handler
