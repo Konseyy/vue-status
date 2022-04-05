@@ -175,7 +175,7 @@ watch(listElementRef, (ref) => {
 	background-color: v-bind("statusValue.color");
 	width: 20px;
 	color: white;
-	transition: background-color 0.15s, padding 0.3s;
+	transition: background-color 0.2s, padding 0.5s;
 	&:hover,
 	&.active {
 		width: auto;
