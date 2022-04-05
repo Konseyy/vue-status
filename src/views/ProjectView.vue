@@ -60,6 +60,7 @@ async function getProjectStatuses() {
 }
 async function changeStatus(projectId: number, newStatus: string) {
 	// TODO api change status
+	console.log(`changing project with id ${projectId} to status ${newStatus}`);
 }
 </script>
 
