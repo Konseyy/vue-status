@@ -8,6 +8,11 @@ export type project = {
   project_name: string;
   project_id: number;
 };
+export type listItem = {
+  id: number;
+  title: string;
+  status: string;
+};
 export type status = {
   status_id: string;
   status_name: string;

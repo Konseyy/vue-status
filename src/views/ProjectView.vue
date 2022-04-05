@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import type { project, status } from '@/library/types';
-import { onMounted, ref } from 'vue';
-import StatusComponent from '../components/StatusComponent.vue';
+import ListView from '@/components/ListView.vue';
 
 const listUrl = 'https://homeassignment.scoro.com/api/v2/projects/list'
 const statusesUrl = 'https://homeassignment.scoro.com/api/v2/statuses/list'
-const localStorageKey = "storageComponent-projects";
-const projects = ref<project[]>([]);
-const projectStatuses = ref<status[]>([]);
-const projectStatusesApiResponse = ref<status[]>([]);
-async function getProjects(): Promise<project[]> {
+async function getProjects() {
 	try {
 		const projectsResponse = await fetch(listUrl, {
 			method: 'POST',
@@ -22,7 +17,11 @@ async function getProjects(): Promise<project[]> {
 		});
 		const projectsResponseJSON = await projectsResponse.json();
 		if (projectsResponseJSON.statusCode === 200) {
-			return projectsResponseJSON.data;
+			return (projectsResponseJSON.data as project[]).map((p) => ({
+				id: p.project_id,
+				title: p.project_name,
+				status: p.status,
+			}));
 		} else {
 			console.error(`error fetching project data, received status code ${projectsResponseJSON.statusCode}`);
 			return [];
@@ -32,7 +31,7 @@ async function getProjects(): Promise<project[]> {
 		return [];
 	}
 }
-async function getProjectStatuses(): Promise<status[]> {
+async function getProjectStatuses() {
 	try {
 		const projectStatusResponse = await fetch(statusesUrl, {
 			method: 'POST',
@@ -49,7 +48,7 @@ async function getProjectStatuses(): Promise<status[]> {
 		});
 		const projectStatusJSON = await projectStatusResponse.json();
 		if (projectStatusJSON.statusCode === 200) {
-			return projectStatusJSON.data;
+			return (projectStatusJSON.data as status[]);
 		} else {
 			console.error(`error fetching project data, received status code ${projectStatusJSON.statusCode}`);
 			return [];
@@ -59,59 +58,16 @@ async function getProjectStatuses(): Promise<status[]> {
 		return [];
 	}
 }
-onMounted(async () => {
-	projectStatuses.value = await getProjectStatuses();
-	projects.value = await getProjects();
-	// check if this list of status options has previously been reordered
-	const order = localStorage.getItem(localStorageKey);
-	if (order) {
-		try {
-			const storedOrderData = JSON.parse(order);
-			if (JSON.stringify(storedOrderData.apiResponse) === JSON.stringify(projectStatusesApiResponse.value)) {
-				projectStatuses.value = storedOrderData.lastOrder;
-			}
-		}
-		catch (e) {
-			console.error("error setting last order", e);
-		}
-	}
-});
-function changeStatusOrder(newOrder: status[]) {
-	projectStatuses.value = newOrder;
-	localStorage.setItem(localStorageKey, JSON.stringify({
-		apiResponse: projectStatusesApiResponse.value,
-		lastOrder: newOrder
-	}));
+async function changeStatus(projectId: number, newStatus: string) {
+	// TODO api change status
 }
 </script>
 
 <template>
-	<ul :class="$style.projectList">
-		<li :class="$style.projectMeta" :key="project.project_id" v-for="project in projects">
-			<StatusComponent
-				:title="project.project_name"
-				:title-ratio="1.5"
-				:class="$style.projectStatus"
-				:starting-status="project.status"
-				:status-options="projectStatuses"
-				:change-status-url="'https://homeassignment.scoro.com/api/v2/projects/modify/' + project.project_id"
-				:reorder-status-options="changeStatusOrder"
-			/>
-		</li>
-	</ul>
+	<ListView
+		:get-items="getProjects"
+		:get-statuses="getProjectStatuses"
+		:modify-status="changeStatus"
+		:local-storage-key="'projects'"
+	/>
 </template>
-
-<style module>
-.projectList {
-	display: grid;
-	grid-template-columns: auto auto;
-	column-gap: 2rem;
-}
-.projectMeta {
-	padding-bottom: 1rem;
-	display: flex;
-}
-.projectStatus {
-	margin-left: auto;
-}
-</style>

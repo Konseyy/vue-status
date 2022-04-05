@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { status } from '@/library/types';
-import { onMounted, reactive, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
 	title: string;
 	titleRatio?: number;
 	startingStatus: string;
-	changeStatusUrl: string;
 	statusOptions: status[];
+	modifyStatus: (newStatus: string) => void;
 	reorderStatusOptions: (newOptions: status[]) => void;
 }>();
 const statusSelectionOpen = ref(false);
@@ -54,16 +54,15 @@ function toggleDropdown() {
 	}
 }
 
-async function selectStatus(status: string, color: string) {
+async function selectStatus(status: status) {
 	// status change handler
-	statusValue.value = status;
+	statusValue.value = status.status_name;
 	statusSelectionOpen.value = false;
-	statusColor.value = color;
+	statusColor.value = status.color;
 	(window as any).closeLastOpened = undefined;
-	//TODO API call to modify status
+	props.modifyStatus(status.status_id);
 }
 function calculateOffset() {
-	console.log("called");
 	if (!listElementRef.value) return { x: 0, y: 0 };
 	// prevent status list from rendering outside viewport
 	const pos = listElementRef.value.getBoundingClientRect();
@@ -93,11 +92,11 @@ function onDrop(evt: DragEvent, droppedOnIndex: number) {
 	props.reorderStatusOptions(newStatusOptions);
 }
 onMounted(() => {
-	// find appropriate color for intial status
-	statusColor.value = props.statusOptions.find((statusOption) => isStatusActive(statusOption))?.color ?? statusColor.value;
 	if (props.statusOptions.length === 0) {
 		console.warn('No status options supplied to component');
 	}
+	// find appropriate color for intial status
+	statusColor.value = props.statusOptions.find((statusOption) => isStatusActive(statusOption))?.color ?? statusColor.value;
 	const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
 	// put selector in viewport if it's outside on window resize
 	window.addEventListener("resize", () => {
@@ -142,7 +141,7 @@ watch(listElementRef, (ref) => {
 						draggable="true"
 						@dragstart="startDrag($event, currentIndex)"
 						@drop="onDrop($event, currentIndex)"
-						@click.stop="selectStatus(statusOption.status_name, statusOption.color)"
+						@click.stop="selectStatus(statusOption)"
 					>
 						<div :class="$style.statusColor" :style="{ backgroundColor: statusOption.color }" />
 						<div :class="$style.statusName">{{ statusOption.status_name }}</div>
