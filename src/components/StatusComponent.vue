@@ -18,6 +18,7 @@ const listElementOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 });
 const titleRatio = `${props.titleRatio ?? 1}em`;
 
 function debounce(func: Function, timeout: number,) {
+	// standart debounce implementation
 	let timer: number
 	return (...args: any[]) => {
 		clearTimeout(timer)
@@ -26,13 +27,11 @@ function debounce(func: Function, timeout: number,) {
 		}, timeout)
 	}
 }
-function isStatusActive(status: status) {
-	return status.status_id === statusValue.value.status_id
-}
 function toggleDropdown() {
-	// status list toggle handler
+	// status list open toggle handler
 	statusSelectionOpen.value = !statusSelectionOpen.value;
 	if (statusSelectionOpen.value) {
+		// if opening dropdown, close previously opened dropdown, and add new dropdown close method to window object 
 		if ((window as any).closeLastOpened) {
 			(window as any).closeLastOpened();
 		}
@@ -50,6 +49,7 @@ function toggleDropdown() {
 			{ once: true }
 		);
 	} else {
+		// if closing dropdown, remove dropdown close method from window object
 		(window as any).closeLastOpened = undefined;
 	}
 }
@@ -62,8 +62,8 @@ async function selectStatus(status: status) {
 	props.modifyStatus(status.status_id);
 }
 function calculateOffset() {
+	// calculate offset to prevent dropdown from rendering outside viewport
 	if (!listElementRef.value) return { x: 0, y: 0 };
-	// prevent status list from rendering outside viewport
 	const pos = listElementRef.value.getBoundingClientRect();
 	const windowHeight = window.innerHeight || document.documentElement.clientHeight;
 	const windowWidth = window.innerWidth || document.documentElement.clientWidth;
@@ -73,15 +73,18 @@ function calculateOffset() {
 	};
 }
 function offsetString() {
+	// transform offset into CSS value string
 	return `${listElementOffset.value.x}px, ${listElementOffset.value.y}px`;
 }
 function startDrag(event: DragEvent, originalIndex: number) {
+	// status option start drag handler
 	if (!event.dataTransfer) return;
 	event.dataTransfer.dropEffect = 'move'
 	event.dataTransfer.effectAllowed = 'move'
 	event.dataTransfer.setData('draggingIndex', originalIndex.toString())
 }
 function onDrop(event: DragEvent, droppedOnIndex: number) {
+	// status option drop handler
 	if (!event.dataTransfer) return;
 	const draggingIndex = parseInt(event.dataTransfer.getData('draggingIndex'));
 	const draggedStatus = props.statusOptions[draggingIndex];
@@ -95,20 +98,21 @@ onMounted(() => {
 		console.warn('No status options supplied to component');
 	}
 	const debouncedCalculateOffset = debounce(() => listElementOffset.value = calculateOffset(), 10);
-	// put selector in viewport if it's outside on window resize
 	window.addEventListener("resize", () => {
+		// put dropdown in viewport if it's outside on window resize
 		if (listElementRef.value) {
 			// debouncedCalculateOffset()
 		}
 	});
-	// put selector in viewport if it's outside on scroll
 	window.addEventListener("scroll", () => {
+		// put dropdown in viewport if it's outside on scroll
 		if (listElementRef.value) {
 			// debouncedCalculateOffset()
 		}
 	});
 });
 watch(listElementRef, (ref) => {
+	// if dropdown gets rendered, recalculate offset so it renders in viewport
 	if (ref) {
 		listElementOffset.value = calculateOffset();
 	}
@@ -136,7 +140,7 @@ watch(listElementRef, (ref) => {
 					<li
 						v-for="(statusOption, currentIndex) in props.statusOptions"
 						:key="statusOption.status_name"
-						:class="[$style.status, isStatusActive(statusOption) ? $style.active : '']"
+						:class="[$style.status, statusOption.status_id === statusValue.status_id ? $style.active : '']"
 						draggable="true"
 						@dragstart="startDrag($event, currentIndex)"
 						@drop="onDrop($event, currentIndex)"

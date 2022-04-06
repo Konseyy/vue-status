@@ -11,38 +11,72 @@ const props = defineProps<{
 }>();
 const items = ref<listItem[]>([]);
 const statuses = ref<status[]>([]);
-const lastStatusResponse = ref<status[]>([]);
+const lastStatusResponseString = ref("");
+const lastItemsResponseString = ref("");
 const loading = ref(true);
+const localStorageKey = `storage-component-${props.localStorageKey}`;
 function changeStatusOrder(newOrder: status[]) {
 	statuses.value = newOrder;
+	// if given a storage key, set new statuses in localstorage
 	if (props.localStorageKey) {
-		localStorage.setItem(props.localStorageKey, JSON.stringify({
-			apiResponse: lastStatusResponse.value,
+		localStorage.setItem(`${localStorageKey}-statuses`, JSON.stringify({
+			apiResponse: JSON.parse(lastStatusResponseString.value),
 			lastOrder: newOrder
 		}));
 	}
 }
 function getActiveStatus(itemStatus: string) {
+	// determine which status from list is the item's current status or set to not found
 	return statuses.value.find((status) => {
 		return status.status_name.toLocaleLowerCase() === itemStatus.toLowerCase() || status.status_id.toLocaleLowerCase() === itemStatus.toLowerCase()
 	}) ?? { status_id: '', status_name: 'Starting status not found', color: '#808080' }
 }
-onMounted(async () => {
-	statuses.value = await props.getStatuses();
-	items.value = await props.getItems();
-	lastStatusResponse.value = statuses.value.map((s) => s);
-	// check if this list of status options has previously been reordered
+function changeStatusLocally(itemId: number, newStatus: string) {
+	items.value = items.value.map(i => {
+		if (i.id !== itemId) return i;
+		return { ...i, status: newStatus }
+	})
+	// if given a storage key, set new item status in localstorage
 	if (props.localStorageKey) {
-		const order = localStorage.getItem(props.localStorageKey);
-		if (order) {
+		localStorage.setItem(`${localStorageKey}-items`, JSON.stringify({
+			apiResponse: JSON.parse(lastItemsResponseString.value),
+			itemList: items.value
+		}));
+	}
+}
+onMounted(async () => {
+	const receivedStatuses = await props.getStatuses();
+	statuses.value = receivedStatuses;
+	lastStatusResponseString.value = JSON.stringify(receivedStatuses);
+	const receivedItems = await props.getItems();
+	items.value = receivedItems;
+	lastItemsResponseString.value = JSON.stringify(receivedItems);
+	// if given a storage key, try to get previously stored info
+	if (props.localStorageKey) {
+		// check if this list of status options has previously been reordered
+		const statusOrder = localStorage.getItem(`${localStorageKey}-statuses`);
+		if (statusOrder) {
 			try {
-				const storedOrderData = JSON.parse(order);
-				if (JSON.stringify(storedOrderData.apiResponse) === JSON.stringify(lastStatusResponse.value)) {
+				const storedOrderData = JSON.parse(statusOrder);
+				if (JSON.stringify(storedOrderData.apiResponse) === lastStatusResponseString.value) {
 					statuses.value = storedOrderData.lastOrder;
 				}
 			}
 			catch (e) {
 				console.error("error setting last order", e);
+			}
+		}
+		// retrieve items with updated statuses from local storage 
+		const storedItems = localStorage.getItem(`${localStorageKey}-items`);
+		if (storedItems) {
+			try {
+				const storedItemData = JSON.parse(storedItems);
+				if (JSON.stringify(storedItemData.apiResponse) === lastItemsResponseString.value) {
+					items.value = storedItemData.itemList;
+				}
+			}
+			catch (e) {
+				console.error("error setting last items", e);
 			}
 		}
 	}
@@ -63,7 +97,10 @@ onMounted(async () => {
 				:starting-status="getActiveStatus(item.status)"
 				:status-options="statuses"
 				:reorder-status-options="changeStatusOrder"
-				:modify-status="(newStatus: string) => props.modifyStatus(item.id, newStatus)"
+				:modify-status="(newStatus: string) => {
+					changeStatusLocally(item.id, newStatus);
+					props.modifyStatus(item.id, newStatus);
+				}"
 			/>
 		</li>
 	</ul>
