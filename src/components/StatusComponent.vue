@@ -215,6 +215,7 @@ watch(listElementRef, (ref) => {
 	position: absolute;
 	background-color: white;
 	border-radius: 4px;
+	overflow: hidden;
 	padding: 0;
 	box-shadow: 0px 2px 6px rgba(31, 34, 38, 0.08),
 		0px 8px 32px rgba(31, 34, 38, 0.12);
@@ -247,11 +248,9 @@ watch(listElementRef, (ref) => {
 	}
 	&:first-of-type {
 		padding-top: 10px;
-		border-radius: 4px 4px 0 0;
 	}
 	&:last-of-type {
 		padding-bottom: 10px;
-		border-radius: 0 0 4px 4px;
 	}
 	&:active {
 		transition: 0.1s;
