@@ -45,10 +45,8 @@ header {
 .pageWrapper {
 	padding: 0 2rem;
 	@media (max-width: 900px) {
-		& {
-			padding: 0;
-			padding-bottom: 0.5rem;
-		}
+		padding: 0;
+		padding-bottom: 0.5rem;
 	}
 }
 .page {

@@ -186,10 +186,8 @@ watch(listElementRef, (ref) => {
 	color: white;
 	user-select: none;
 	transition: background-color 0.2s, padding 0.5s;
-	@media (max-width: 480px) {
-		& {
-			transition: 0s;
-		}
+	@media (hover: none) {
+		transition: 0s;
 	}
 	&:hover,
 	&.active {
