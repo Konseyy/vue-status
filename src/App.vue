@@ -38,7 +38,7 @@ const router = useRouter();
 }
 header {
 	display: flex;
-	align-self: flex-start;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 	width: 100%;
 }
 .pageWrapper {
@@ -46,7 +46,7 @@ header {
 	@media (max-width: 900px) {
 		& {
 			padding: 0;
-			padding-bottom: .5rem;
+			padding-bottom: 0.5rem;
 		}
 	}
 }
@@ -61,30 +61,30 @@ header {
 	box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
 }
 .pageSelector {
-	margin-bottom: 1em;
-	border-radius: 1rem 0 0.4em 0;
+	border-radius: 1rem 0 0 0;
 	overflow: hidden;
-	align-self: flex-start;
 	display: flex;
-	box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
 }
 .pageLink {
+	display: flex;
+	align-items: center;
 	text-decoration: none;
-	font-size: 1.5em;
+	font-size: 1.3em;
 	padding: 0.35em 0.45em;
-	color: white;
-	background-color: rgb(140, 140, 140);
+	color: black;
+	background-color: transparent;
 	transition: background-color 0.15s;
 	&:hover {
-		background-color: rgb(120, 120, 120);
+		background-color: rgba(0, 0, 0, 0.05);
 		cursor: pointer;
 	}
 	&:active,
 	&.router-link-active:active {
-		background-color: rgb(70, 70, 70);
+		background-color: rgba(0, 0, 0, 0.15);
 	}
 	&.router-link-active {
-		background-color: rgb(90, 90, 90);
+		color: white;
+		background-color: rgba(0, 0, 0, 0.5);
 	}
 }
 .coloredButtonContainer {
@@ -93,7 +93,6 @@ header {
 	justify-content: center;
 	margin-left: auto;
 	margin-right: 15px;
-	height: 45px;
 	gap: 10px;
 }
 .coloredButton {
