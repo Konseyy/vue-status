@@ -70,6 +70,7 @@ header {
 	padding: 0.35em 0.45em;
 	color: black;
 	background-color: transparent;
+	user-select: none;
 	transition: background-color 0.15s;
 	&:hover {
 		background-color: rgba(0, 0, 0, 0.05);
