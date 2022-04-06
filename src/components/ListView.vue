@@ -135,16 +135,6 @@ onMounted(async () => {
 	width: 100%;
 	min-width: 900px;
 }
-.list > .listItem:nth-child(4n + 1),
-.list > .listItem:nth-child(4n + 2) {
-	background-color: #f4f2fd;
-}
-.list > .listItem:nth-child(2n) {
-	padding-right: 2rem;
-}
-.list > .listItem:nth-child(2n + 1) {
-	padding-left: 2rem;
-}
 .listItem {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
@@ -152,6 +142,22 @@ onMounted(async () => {
 	padding-right: 1rem;
 	display: flex;
 	justify-content: center;
+	&:nth-child(4n + 1),
+	&:nth-child(4n + 2) {
+		background-color: #f4f2fd;
+	}
+	&:nth-child(2n) {
+		padding-right: 2rem;
+	}
+	&:nth-child(2n + 1) {
+		padding-left: 2rem;
+	}
+	&:nth-last-child(1) {
+		border-bottom-right-radius: 1rem;
+	}
+	&:nth-last-child(2) {
+		border-bottom-left-radius: 1rem;
+	}
 }
 .status {
 	margin-left: auto;
@@ -166,15 +172,22 @@ onMounted(async () => {
 		min-width: 100%;
 		width: 90vw;
 	}
-	.list > .listItem:nth-child(4n + 1),
-	.list > .listItem:nth-child(4n + 2) {
-		background-color: transparent;
-	}
-	.list > .listItem:nth-child(2n) {
-		background-color: #f4f2fd;
-	}
-	.list > .listItem {
+	.listItem {
 		padding: 0.5rem 2rem;
+		&:nth-child(4n + 1),
+		&:nth-child(4n + 2) {
+			background-color: transparent;
+		}
+		&:nth-child(2n) {
+			background-color: #f4f2fd;
+		}
+		&:nth-last-child(1) {
+			border-bottom-left-radius: 1rem;
+			border-bottom-right-radius: 1rem;
+		}
+		&:nth-last-child(2) {
+			border-radius: 0;
+		}
 	}
 }
 </style>
