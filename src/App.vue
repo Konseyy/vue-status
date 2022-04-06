@@ -34,11 +34,12 @@ const router = useRouter();
 #app {
 	display: flex;
 	justify-content: center;
-	align-items: center;
+	overflow-x: hidden;
+	min-height: 100vh;
 }
 header {
 	display: flex;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 	width: 100%;
 }
 .pageWrapper {
@@ -66,8 +67,6 @@ header {
 	display: flex;
 }
 .pageLink {
-	display: flex;
-	align-items: center;
 	text-decoration: none;
 	font-size: 1.3em;
 	padding: 0.35em 0.45em;
@@ -90,7 +89,6 @@ header {
 .coloredButtonContainer {
 	display: flex;
 	align-items: center;
-	justify-content: center;
 	margin-left: auto;
 	margin-right: 15px;
 	gap: 10px;
@@ -111,8 +109,6 @@ header {
 	}
 }
 .pageContent {
-	display: flex;
-	justify-content: center;
 	font-size: 12px;
 	width: 100%;
 }

@@ -173,7 +173,6 @@ watch(listElementRef, (ref) => {
 	justify-self: end;
 }
 .statusValue {
-	// margin-left:auto;
 	align-self: flex-end;
 	display: flex;
 	justify-content: center;

@@ -119,7 +119,6 @@ onMounted(async () => {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 100%;
 	min-width: 900px;
 	height: 60vh;
 }
@@ -132,7 +131,6 @@ onMounted(async () => {
 .list {
 	display: grid;
 	grid-template-columns: auto auto;
-	width: 100%;
 	min-width: 900px;
 }
 .listItem {
@@ -158,9 +156,6 @@ onMounted(async () => {
 	&:nth-last-child(2) {
 		border-bottom-left-radius: 1rem;
 	}
-}
-.status {
-	margin-left: auto;
 }
 @media (max-width: 900px) {
 	.loadingContainer {
