@@ -16,8 +16,16 @@ Status change component implementation in Vue.js
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
 
-## Project Setup
 
+## Project Setup
+### Add necesary .env variables
+* Create a file called `.env` at the root of the project
+* Define the following variables in the file with your appropriate values for it to be able to fetch data from the api 
+```
+VITE_COMPANY_ID={company id}
+VITE_API_KEY={api key}
+```
+### Install npm packages
 ```sh
 npm install
 ```
