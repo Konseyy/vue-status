@@ -32,25 +32,25 @@ function toggleDropdown() {
 	statusSelectionOpen.value = !statusSelectionOpen.value;
 	if (statusSelectionOpen.value) {
 		// if opening dropdown, close previously opened dropdown, and add new dropdown close method to window object 
-		if ((window as any).closeLastOpened) {
-			(window as any).closeLastOpened();
+		if (window.closeLastOpened) {
+			window.closeLastOpened();
 		}
-		(window as any).closeLastOpened = function () {
+		window.closeLastOpened = function () {
 			statusSelectionOpen.value = false;
-			(window as any).closeLastOpened = undefined;
+			window.closeLastOpened = undefined;
 		};
 		window.addEventListener(
 			'click',
 			() => {
-				if ((window as any).closeLastOpened) {
-					(window as any).closeLastOpened();
+				if (window.closeLastOpened) {
+					window.closeLastOpened();
 				}
 			},
 			{ once: true }
 		);
 	} else {
 		// if closing dropdown, remove dropdown close method from window object
-		(window as any).closeLastOpened = undefined;
+		window.closeLastOpened = undefined;
 	}
 }
 
@@ -58,7 +58,7 @@ async function selectStatus(status: status) {
 	// status change handler
 	statusValue.value = status;
 	statusSelectionOpen.value = false;
-	(window as any).closeLastOpened = undefined;
+	window.closeLastOpened = undefined;
 	props.modifyStatus(status.status_id);
 }
 function calculateOffset() {
