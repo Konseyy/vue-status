@@ -93,7 +93,6 @@ onMounted(async () => {
 			<StatusComponent
 				:title="item.title"
 				:title-ratio="1.5"
-				:class="$style.status"
 				:starting-status="getActiveStatus(item.status)"
 				:status-options="statuses"
 				:reorder-status-options="changeStatusOrder"
