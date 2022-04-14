@@ -2,8 +2,8 @@
 import type { project, status } from '@/library/types';
 import ListView from '@/components/ListView.vue';
 
-const listUrl = '/api/list'
-const statusesUrl = '/api/statuses'
+const listUrl = 'https://www.valdis.me/api/list'
+const statusesUrl = 'https://www.valdis.me/api/statuses'
 async function getProjects() {
 	try {
 		const projectsResponse = await fetch(listUrl, {
