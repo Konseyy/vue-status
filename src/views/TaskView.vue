@@ -2,18 +2,18 @@
 import type { task, status } from '@/library/types';
 import ListView from '../components/ListView.vue';
 
-const listUrl = 'https://homeassignment.scoro.com/api/v2/tasks/list'
-const statusesUrl = 'https://www.valdis.me/api/statuses';
+const listUrl = '/api/list'
+const statusesUrl = '/api/statuses';
 async function getTasks() {
 	try {
 		const tasksResponse = await fetch(listUrl, {
 			method: 'POST',
 			body: JSON.stringify({
-				lang: 'eng',
-				company_account_id: import.meta.env.VITE_COMPANY_ID,
-				apiKey: import.meta.env.VITE_API_KEY,
-				request: {},
+				module: "tasks"
 			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
 		});
 		const tasksResponseJSON = await tasksResponse.json();
 		if (tasksResponseJSON.statusCode === 200) {
@@ -37,9 +37,13 @@ async function getTaskStatuses() {
 			method: "POST",
 			body: JSON.stringify({
 				module: "tasks"
-			})
+			}),
+			headers: {
+				"Content-Type": "application/json"
+			}
 		})
 		const taskStatusJSON = await taskStatusResponse.json();
+		console.log("received", taskStatusJSON)
 		if (taskStatusJSON.statusCode === 200) {
 			return (taskStatusJSON.data as status[]);
 		} else {
