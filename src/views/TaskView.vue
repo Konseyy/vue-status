@@ -3,7 +3,7 @@ import type { task, status } from '@/library/types';
 import ListView from '../components/ListView.vue';
 
 const listUrl = 'https://homeassignment.scoro.com/api/v2/tasks/list'
-const statusesUrl = 'https://homeassignment.scoro.com/api/v2/statuses/list';
+const statusesUrl = 'https://www.valdis.me/api/statuses';
 async function getTasks() {
 	try {
 		const tasksResponse = await fetch(listUrl, {
@@ -34,18 +34,11 @@ async function getTasks() {
 async function getTaskStatuses() {
 	try {
 		const taskStatusResponse = await fetch(statusesUrl, {
-			method: 'POST',
+			method: "POST",
 			body: JSON.stringify({
-				lang: 'eng',
-				company_account_id: import.meta.env.VITE_COMPANY_ID,
-				apiKey: import.meta.env.VITE_API_KEY,
-				filter: {
-					module: [
-						"tasks"
-					]
-				}
-			}),
-		});
+				module: "tasks"
+			})
+		})
 		const taskStatusJSON = await taskStatusResponse.json();
 		if (taskStatusJSON.statusCode === 200) {
 			return (taskStatusJSON.data as status[]);
@@ -65,10 +58,6 @@ async function changeStatus(taskId: number, newStatus: string) {
 </script>
 
 <template>
-	<ListView
-		:get-items="getTasks"
-		:get-statuses="getTaskStatuses"
-		:modify-status="changeStatus"
-		:local-storage-key="'tasks'"
-	/>
+	<ListView :get-items="getTasks" :get-statuses="getTaskStatuses" :modify-status="changeStatus"
+		:local-storage-key="'tasks'" />
 </template>
