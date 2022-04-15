@@ -61,6 +61,6 @@ async function changeStatus(projectId: number, newStatus: string) {
 </script>
 
 <template>
-	<ListView :get-items="getProjects" :get-statuses="getProjectStatuses" :modify-status="changeStatus"
+	<ListView :get-items="getProjects" :get-statuses="getProjectStatuses" @item-changed-status="changeStatus"
 		:local-storage-key="'projects'" />
 </template>

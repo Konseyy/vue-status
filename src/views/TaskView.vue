@@ -43,7 +43,6 @@ async function getTaskStatuses() {
 			}
 		})
 		const taskStatusJSON = await taskStatusResponse.json();
-		console.log("received", taskStatusJSON)
 		if (taskStatusJSON.statusCode === 200) {
 			return (taskStatusJSON.data as status[]);
 		} else {
@@ -62,6 +61,6 @@ async function changeStatus(taskId: number, newStatus: string) {
 </script>
 
 <template>
-	<ListView :get-items="getTasks" :get-statuses="getTaskStatuses" :modify-status="changeStatus"
+	<ListView :get-items="getTasks" :get-statuses="getTaskStatuses" @item-changed-status="changeStatus"
 		:local-storage-key="'tasks'" />
 </template>

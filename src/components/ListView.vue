@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import type { listItem, status } from '@/library/types';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import StatusComponent from './StatusComponent.vue';
 
 const props = defineProps<{
 	getItems: () => Promise<listItem[]>;
 	getStatuses: () => Promise<status[]>;
-	modifyStatus: (itemId: number, newStatus: string) => Promise<void>;
 	localStorageKey?: string;
+}>();
+const emit = defineEmits<{
+	(event: "item-changed-status", itemId: number, newStatus: string): Promise<void>;
 }>();
 const items = ref<listItem[]>([]);
 const statuses = ref<status[]>([]);
 const lastStatusResponseString = ref("");
 const lastItemsResponseString = ref("");
 const loading = ref(true);
-const localStorageKey = `storage-component-${props.localStorageKey}`;
+const localStorageKey = computed(() => `storage-component-${props.localStorageKey}`);
 function changeStatusOrder(newOrder: status[]) {
 	statuses.value = newOrder;
 	// if given a storage key, set new statuses in localstorage
@@ -90,17 +92,11 @@ onMounted(async () => {
 	</div>
 	<ul v-if="!loading" :class="$style.list">
 		<li :class="$style.listItem" :key="item.id" v-for="item in items">
-			<StatusComponent
-				:title="item.title"
-				:title-ratio="1.5"
-				:starting-status="getActiveStatus(item.status)"
-				:status-options="statuses"
-				:reorder-status-options="changeStatusOrder"
-				:modify-status="(newStatus: string) => {
+			<StatusComponent :title="item.title" :title-ratio="1.5" :starting-status="getActiveStatus(item.status)"
+				:status-options="statuses" @status-reordered="changeStatusOrder" @status-changed="(newStatus: string) => {
 					changeStatusLocally(item.id, newStatus);
-					props.modifyStatus(item.id, newStatus);
-				}"
-			/>
+					emit('item-changed-status', item.id, newStatus);
+				}" />
 		</li>
 	</ul>
 </template>
@@ -110,10 +106,12 @@ onMounted(async () => {
 	0% {
 		transform: rotate(0deg);
 	}
+
 	100% {
 		transform: rotate(360deg);
 	}
 }
+
 .loadingContainer {
 	display: flex;
 	justify-content: center;
@@ -121,17 +119,20 @@ onMounted(async () => {
 	min-width: 900px;
 	height: 60vh;
 }
+
 .loadingImg {
 	height: 4vh;
 	width: 4vh;
 	animation: spin;
 	animation: spin 1s linear infinite;
 }
+
 .list {
 	display: grid;
 	grid-template-columns: auto auto;
 	min-width: 900px;
 }
+
 .listItem {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
@@ -139,46 +140,58 @@ onMounted(async () => {
 	padding-right: 1rem;
 	display: flex;
 	justify-content: center;
+
 	&:nth-child(4n + 1),
 	&:nth-child(4n + 2) {
 		background-color: #f4f2fd;
 	}
+
 	&:nth-child(2n) {
 		padding-right: 2rem;
 	}
+
 	&:nth-child(2n + 1) {
 		padding-left: 2rem;
 	}
+
 	&:nth-last-child(1) {
 		border-bottom-right-radius: 1rem;
 	}
+
 	&:nth-last-child(2) {
 		border-bottom-left-radius: 1rem;
 	}
 }
+
 @media (max-width: 900px) {
 	.loadingContainer {
 		min-width: 100%;
 		width: 90vw;
 	}
+
 	.list {
 		grid-template-columns: auto;
 		min-width: 100%;
 		width: 90vw;
 	}
+
 	.listItem {
 		padding: 0.5rem 2rem;
+
 		&:nth-child(4n + 1),
 		&:nth-child(4n + 2) {
 			background-color: transparent;
 		}
+
 		&:nth-child(2n) {
 			background-color: #f4f2fd;
 		}
+
 		&:nth-last-child(1) {
 			border-bottom-left-radius: 1rem;
 			border-bottom-right-radius: 1rem;
 		}
+
 		&:nth-last-child(2) {
 			border-radius: 0;
 		}
