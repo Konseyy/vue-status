@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import type { project, status } from '@/library/types';
+import type { listItem, status } from '@/library/types';
 import ListView from '@/components/ListView.vue';
 
-const listUrl = 'https://www.valdis.me/api/list'
-const statusesUrl = 'https://www.valdis.me/api/statuses'
+const graphQlEndpoint = 'https://www.valdis.me/api/graphql';
 async function getProjects() {
 	try {
-		const projectsResponse = await fetch(listUrl, {
+		const projectsResponse = await fetch(graphQlEndpoint, {
 			method: 'POST',
 			body: JSON.stringify({
-				module: "projects"
+				query: `
+					query {
+						vue_status_component_list(module: projects) {
+							id
+							title: name
+							status
+						}
+					}
+				`
 			}),
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
 		const projectsResponseJSON = await projectsResponse.json();
-		if (projectsResponseJSON.statusCode === 200) {
-			return (projectsResponseJSON.data as project[]).map((p) => ({
-				id: p.project_id,
-				title: p.project_name,
-				status: p.status,
-			}));
-		} else {
-			console.error(`error fetching project data, received status code ${projectsResponseJSON.statusCode}`);
-			return [];
-		}
+		return projectsResponseJSON.data.vue_status_component_list as listItem[]
 	} catch (e) {
 		console.error('error fetching project data', e);
 		return [];
@@ -33,22 +31,25 @@ async function getProjects() {
 }
 async function getProjectStatuses() {
 	try {
-		const projectStatusResponse = await fetch(statusesUrl, {
+		const projectStatusResponse = await fetch(graphQlEndpoint, {
 			method: 'POST',
 			body: JSON.stringify({
-				module: "projects"
+				query: `
+					query {
+						vue_status_component_statuses(module: projects) {
+							status_id
+							status_name
+							color
+						}
+					}
+				`
 			}),
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
 		const projectStatusJSON = await projectStatusResponse.json();
-		if (projectStatusJSON.statusCode === 200) {
-			return (projectStatusJSON.data as status[]);
-		} else {
-			console.error(`error fetching project data, received status code ${projectStatusJSON.statusCode}`);
-			return [];
-		}
+		return projectStatusJSON.data.vue_status_component_statuses as status[];
 	} catch (e) {
 		console.error('error fetching project data', e);
 		return [];

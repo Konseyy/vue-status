@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import type { task, status } from '@/library/types';
+import type { status, listItem } from '@/library/types';
 import ListView from '../components/ListView.vue';
 
-const listUrl = 'https://www.valdis.me/api/list'
-const statusesUrl = 'https://www.valdis.me/api/statuses';
+const graphQlEndpoint = 'https://www.valdis.me/api/graphql';
 async function getTasks() {
 	try {
-		const tasksResponse = await fetch(listUrl, {
+		const tasksResponse = await fetch(graphQlEndpoint, {
 			method: 'POST',
 			body: JSON.stringify({
-				module: "tasks"
+				query: `
+					query {
+						vue_status_component_list(module: tasks) {
+							id
+							title: name
+							status
+						}
+					}
+				`
 			}),
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
 		const tasksResponseJSON = await tasksResponse.json();
-		if (tasksResponseJSON.statusCode === 200) {
-			return (tasksResponseJSON.data as task[]).map((t) => ({
-				id: t.event_id,
-				title: t.event_name,
-				status: t.status,
-			}));
-		} else {
-			console.error(`error fetching task data, received status code ${tasksResponseJSON.statusCode}`);
-			return [];
-		}
+		return tasksResponseJSON.data.vue_status_component_list as listItem[]
 	} catch (e) {
 		console.error('error fetching task data', e);
 		return [];
@@ -33,22 +31,26 @@ async function getTasks() {
 }
 async function getTaskStatuses() {
 	try {
-		const taskStatusResponse = await fetch(statusesUrl, {
+		const taskStatusResponse = await fetch(graphQlEndpoint, {
 			method: "POST",
 			body: JSON.stringify({
-				module: "tasks"
+				query: `
+					query {
+						vue_status_component_statuses(module: tasks) {
+							status_id
+							status_name
+							color
+						}
+					}
+				`
 			}),
 			headers: {
 				"Content-Type": "application/json"
 			}
 		})
 		const taskStatusJSON = await taskStatusResponse.json();
-		if (taskStatusJSON.statusCode === 200) {
-			return (taskStatusJSON.data as status[]);
-		} else {
-			console.error(`error fetching project data, received status code ${taskStatusJSON.statusCode}`);
-			return [];
-		}
+		console.log("received", taskStatusJSON);
+		return (taskStatusJSON.data.vue_status_component_statuses as status[]);
 	} catch (e) {
 		console.error('error fetching project data', e);
 		return [];
